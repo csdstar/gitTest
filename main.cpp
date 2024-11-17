@@ -21,7 +21,7 @@ void PrintSystemRelatedInfo() {
     cout << left << setw(indent - 2) << "虚拟分页大小:" << sysInfo.dwPageSize / 1024 << " KB" << endl;
     cout << left << setw(indent) << "最小应用程序大小:" << sysInfo.lpMinimumApplicationAddress << endl;
     cout << left << setw(indent) << "最大应用程序地址:" << sysInfo.lpMaximumApplicationAddress << endl;
-    cout << left << setw(indent - 3) << "总虚拟内存:" << dec << (statex.ullTotalVirtual / (1024 * 1024 * 1024)) << " GB" << endl;
+    cout << left << setw(indent - 3) << "总虚拟内存:" << dec << statex.ullTotalVirtual / (1024 * 1024 * 1024) << " GB" << endl;
 }
 
 // 获取系统性能信息
