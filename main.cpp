@@ -38,9 +38,9 @@ void PrintSystemPerformanceInfo() {
 
     if (GlobalMemoryStatusEx(&statex)) {
         // 总物理内存
-        cout << left << setw(indent - 3) << "总物理内存:" << statex.ullTotalPhys / (1024 * 1024) << " MB" << endl;
+        cout << left << setw(indent - 3) << "总物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullTotalPhys) / (1024 * 1024 * 1024) << " GB" << endl;
         // 空闲物理内存
-        cout << left << setw(indent - 2) << "空闲物理内存:" << statex.ullAvailPhys / (1024 * 1024) << " MB" << endl;
+        cout << left << setw(indent - 2) << "空闲物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullAvailPhys) / (1024 * 1024 * 1024) << " GB" << endl;
     } else {
         cerr << "获取内存信息失败" << endl;
     }
@@ -48,11 +48,11 @@ void PrintSystemPerformanceInfo() {
     PERFORMANCE_INFORMATION perfInfo;
     if (GetPerformanceInfo(&perfInfo, sizeof(perfInfo))) {
         // 当前提交的页面总数
-        cout << left << setw(indent + 1) << "当前提交的页面总数:" << perfInfo.CommitTotal << endl;
+        cout << left << setw(indent + 1) << "当前提交的页面总数:" << perfInfo.CommitTotal << "页" << endl;
         // 当前可提交的最大页面数
-        cout << left << setw(indent + 3) << "当前可提交的最大页面数:" << perfInfo.CommitLimit << endl;
+        cout << left << setw(indent + 3) << "当前可提交的最大页面数:" << perfInfo.CommitLimit << "页" << endl;
         // 历史提交的页面峰值
-        cout << left << setw(indent + 1) << "历史提交的页面峰值:" << perfInfo.CommitPeak << endl;
+        cout << left << setw(indent + 1) << "历史提交的页面峰值:" << perfInfo.CommitPeak << "页" << endl;
         // 当前打开的句柄数
         cout << left << setw(indent) << "当前打开的句柄数:" << perfInfo.HandleCount << endl;
         // 当前进程数
