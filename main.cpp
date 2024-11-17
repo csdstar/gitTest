@@ -14,8 +14,6 @@ void printSystemRelatedInfo() {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
 
-    
-
     // 使用setw来设置字段宽度，确保信息部分对齐
     cout << "\n--------------系统相关信息--------------" << endl;
     cout << left << setw(indent - 2) << "系统分页大小:" << sysInfo.dwPageSize / 1024 << " KB" << endl;
@@ -40,12 +38,16 @@ void printSystemRelatedInfo() {
             cout << "未知" << endl;
             break;
     }
-    cout << left << setw(indent + 2) << "当前活跃的处理器数量:" << sysInfo.dwNumberOfProcessors << endl;;
+    cout << left << setw(indent + 2) << "当前活跃的处理器数量:" << sysInfo.dwNumberOfProcessors << endl;
+    cout << endl;
+}
 
-
+//获取内存信息
+void printMemoryInfo() {
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(MEMORYSTATUSEX);
     if (GlobalMemoryStatusEx(&statex)) {
+        cout << "\n--------------内存相关信息--------------" << endl;
         // 总物理内存
         cout << left << setw(indent - 3) << "总物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullTotalPhys) / (1024 * 1024 * 1024) << " GB" << endl;
         // 空闲物理内存
@@ -54,8 +56,12 @@ void printSystemRelatedInfo() {
         cout << left << setw(indent - 3) << "总虚拟内存:" << dec << fixed << setprecision(2) << static_cast<double>(statex.ullTotalVirtual / (1024 * 1024 * 1024)) << " GB" << endl;
         // 空闲虚拟内存
         cout << left << setw(indent - 2) << "空闲虚拟内存:" << dec << fixed << setprecision(2) << static_cast<double>(statex.ullAvailVirtual / (1024 * 1024 * 1024)) << " GB" << endl;
-    } else {
+        cout << left << setw(indent - 1) << "当前内存使用率:" << fixed << setprecision(2) << static_cast<double>(statex.dwMemoryLoad) << "%" << endl;
+        cout << endl;
+    }
+    else {
         cerr << "获取内存信息失败" << endl;
+        cout << endl;
     }
 }
 
@@ -82,12 +88,14 @@ void printSystemPerformanceInfo() {
         cout << left << setw(indent - 3) << "当前进程数:" << perfInfo.ProcessCount << endl;
         // 当前线程数
         cout << left << setw(indent - 3) << "当前线程数:" << perfInfo.ThreadCount << endl;
+        cout << endl;
     } else {
         cerr << "获取性能信息失败" << endl;
+        cout << endl;
     }
 }
 
-// 打印进程信息
+// 打印全部进程信息
 void printProcessesInfo() {
     cout << "\n--------------系统进程信息--------------" << endl;
     // 获取当前系统的进程快照
@@ -125,7 +133,7 @@ void printProcessesInfo() {
     } else {
         cerr << "无法获取进程信息" << endl;
     }
-
+    cout << endl;
     CloseHandle(hProcessSnap); // 关闭进程快照句柄
 }
 
@@ -138,6 +146,7 @@ void queryProcessMemoryInfo(DWORD processID) {
     HANDLE hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, processID);
     if (hProcess == NULL) {
         cerr << "无法打开进程，错误代码: " << GetLastError() << endl;
+        cout << endl;
         return;
     }
 
@@ -219,18 +228,18 @@ void queryProcessMemoryInfo(DWORD processID) {
         // 更新查询地址
         address = (LPBYTE)mbi.BaseAddress + mbi.RegionSize;
     }
-
+    cout << endl;
     CloseHandle(hProcess);  // 关闭进程句柄
 }
 
 int main() {
     string input;
     DWORD processId;
+    
+    // 提示用户输入命令
+    cout << "\n请输入命令\n(输入'info' 查看系统信息, 'performance' 查看性能信息, 'memory' 查看内存信息, 'process' 查看进程信息, 'query-process' 查询具体进程信息,  'exit' 退出)\n";
     while (true) {
-        // 提示用户输入命令
-        cout << "\n请输入命令\n（'info' 查看系统信息，'performance' 查看性能信息，'process' 查看进程信息，'memory' 查询进程内存信息，'exit' 退出）: ";
         getline(cin, input);  // 获取用户输入的命令
-
         // 根据输入的命令调用对应的函数
         if (input == "info") {
             printSystemRelatedInfo();
@@ -242,6 +251,9 @@ int main() {
             printProcessesInfo();
         } 
         else if (input == "memory") {
+            printMemoryInfo();
+        }
+        else if (input == "query-process") {
             cout << "请输入进程ID: ";
             cin >> processId;  // 获取用户输入的进程ID
             cin.ignore();  // 忽略换行符
@@ -250,9 +262,12 @@ int main() {
         else if (input == "exit") {
             cout << "退出程序..." << endl;
             break;  // 退出循环，结束程序
+        }
+        else if (input == "help") {
+            cout << "\n'info': 查看系统信息\n'performance': 查看性能信息\n'memory': 查看内存信息\n'process': 查看进程信息\n'query-process': 查询具体进程信息\n'exit': 退出\n\n";
         } 
         else {
-            cout << "无效命令，请重新输入。" << endl;
+            cout << "无效命令，请重新输入。输入'help'查看帮助" << endl;
         }
     }
     return 0;
