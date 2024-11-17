@@ -14,40 +14,61 @@ void printSystemRelatedInfo() {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
 
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx(&statex);
+    
 
     // 使用setw来设置字段宽度，确保信息部分对齐
     cout << "\n--------------系统相关信息--------------" << endl;
-    cout << left << setw(indent - 2) << "虚拟分页大小:" << sysInfo.dwPageSize / 1024 << " KB" << endl;
-    cout << left << setw(indent) << "最小应用程序大小:" << sysInfo.lpMinimumApplicationAddress << endl;
+    cout << left << setw(indent - 2) << "系统分页大小:" << sysInfo.dwPageSize / 1024 << " KB" << endl;
+    cout << left << setw(indent) << "最小应用程序地址:" << sysInfo.lpMinimumApplicationAddress << endl;
     cout << left << setw(indent) << "最大应用程序地址:" << sysInfo.lpMaximumApplicationAddress << endl;
-    cout << left << setw(indent - 3) << "总虚拟内存:" << dec << statex.ullTotalVirtual / (1024 * 1024 * 1024) << " GB" << endl;
+    cout << left << setw(indent - 1) << "处理器架构类型:";
+    switch (sysInfo.wProcessorArchitecture) {
+        case PROCESSOR_ARCHITECTURE_INTEL:
+            cout << "x86" << endl;
+            break;
+        case PROCESSOR_ARCHITECTURE_AMD64:
+            cout << "x64" << endl;
+            break;
+        case PROCESSOR_ARCHITECTURE_ARM:
+            cout << "ARM" << endl;
+            break;
+        case PROCESSOR_ARCHITECTURE_IA64:
+            cout << "Itanium" << endl;
+            break;
+        case PROCESSOR_ARCHITECTURE_UNKNOWN:
+        default:
+            cout << "未知" << endl;
+            break;
+    }
+    cout << left << setw(indent + 2) << "当前活跃的处理器数量:" << sysInfo.dwNumberOfProcessors << endl;;
+
+
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(MEMORYSTATUSEX);
+    if (GlobalMemoryStatusEx(&statex)) {
+        // 总物理内存
+        cout << left << setw(indent - 3) << "总物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullTotalPhys) / (1024 * 1024 * 1024) << " GB" << endl;
+        // 空闲物理内存
+        cout << left << setw(indent - 2) << "空闲物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullAvailPhys) / (1024 * 1024 * 1024) << " GB" << endl;
+        // 总虚拟内存
+        cout << left << setw(indent - 3) << "总虚拟内存:" << dec << fixed << setprecision(2) << static_cast<double>(statex.ullTotalVirtual / (1024 * 1024 * 1024)) << " GB" << endl;
+        // 空闲虚拟内存
+        cout << left << setw(indent - 2) << "空闲虚拟内存:" << dec << fixed << setprecision(2) << static_cast<double>(statex.ullAvailVirtual / (1024 * 1024 * 1024)) << " GB" << endl;
+    } else {
+        cerr << "获取内存信息失败" << endl;
+    }
 }
 
 // 获取系统性能信息
 void printSystemPerformanceInfo() {
     SYSTEM_INFO sysInfo;
+    PERFORMANCE_INFORMATION perfInfo;
     GetSystemInfo(&sysInfo);
 
     // 页大小
     cout << "\n--------------系统性能信息--------------" << endl;
     cout << left << setw(indent - 5) << "页大小:" << sysInfo.dwPageSize / 1024 << " KB" << endl;
 
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(MEMORYSTATUSEX);
-
-    if (GlobalMemoryStatusEx(&statex)) {
-        // 总物理内存
-        cout << left << setw(indent - 3) << "总物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullTotalPhys) / (1024 * 1024 * 1024) << " GB" << endl;
-        // 空闲物理内存
-        cout << left << setw(indent - 2) << "空闲物理内存:" << fixed << setprecision(2) << static_cast<double>(statex.ullAvailPhys) / (1024 * 1024 * 1024) << " GB" << endl;
-    } else {
-        cerr << "获取内存信息失败" << endl;
-    }
-
-    PERFORMANCE_INFORMATION perfInfo;
     if (GetPerformanceInfo(&perfInfo, sizeof(perfInfo))) {
         // 当前提交的页面总数
         cout << left << setw(indent + 1) << "当前提交的页面总数:" << perfInfo.CommitTotal << "页" << endl;
